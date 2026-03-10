@@ -31,3 +31,4 @@ dist-ssr
 
 cambios-registro.md
 monitor.cjs
+.env.example
