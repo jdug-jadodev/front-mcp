@@ -1,264 +1,263 @@
 # 📊 Registro de Cambios con Estadísticas
-**Iniciado:** 10/3/2026, 1:46:39 p. m.
+**Iniciado:** 10/3/2026, 1:49:42 p. m.
 **Proyecto:** C:\Users\Usuario\Documents\mcp-server\front-mcp
-**Formato:** Archivos nuevos, modificados y eliminados
-**Estado:** Monitoreando cambios no commiteados
+**Último commit:** d716a62 - Inicialización del proyecto: se agregan archivos base de configuración, documentación, estructura de carpetas y recursos iniciales. Incluye configuración de ESLint, Tailwind, Vite, archivos de ejemplo y documentación para componentes, hooks, rutas, servicios y estilos. (1 second ago)
+**Estado:** Monitoreando nuevos cambios
 
 
-## 🕐 10/03/2026, 13:46:41
-
-### 📊 Resumen
-- **Total archivos:** 28
-- **📝 Nuevos:** 27
-- **✏️ Modificados:** 1
-- **🗑️ Eliminados:** 0
-- **Líneas añadidas:** +0
-- **Líneas eliminadas:** -0
-- **Balance neto:** 0 líneas
-
-### 📝 Detalle por archivo
-
-| Estado | Archivo | Añadidas | Eliminadas | Neto |
-|--------|---------|----------|------------|------|
-| 🆕 | `.env.example` | nuevo | -0 | 0 |
-| 🆕 | `.gitignore` | nuevo | -0 | 0 |
-| 🆕 | `ONE_SPEC.md` | nuevo | -0 | 0 |
-| 🆕 | `eslint.config.js` | nuevo | -0 | 0 |
-| 🆕 | `index.html` | nuevo | -0 | 0 |
-| 🆕 | `monitor.cjs` | nuevo | -0 | 0 |
-| 🆕 | `package.json` | nuevo | -0 | 0 |
-| 🆕 | `pnpm-lock.yaml` | nuevo | -0 | 0 |
-| 🆕 | `postcss.config.cjs` | nuevo | -0 | 0 |
-| 🆕 | `public/vite.svg` | nuevo | -0 | 0 |
-| 🆕 | `src/App.css` | nuevo | -0 | 0 |
-| 🆕 | `src/App.tsx` | nuevo | -0 | 0 |
-| 🆕 | `src/assets/react.svg` | nuevo | -0 | 0 |
-| 🆕 | `src/components/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/hooks/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/index.css` | nuevo | -0 | 0 |
-| 🆕 | `src/lib/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/main.tsx` | nuevo | -0 | 0 |
-| 🆕 | `src/pages/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/routes/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/services/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/styles/global.css` | nuevo | -0 | 0 |
-| 🆕 | `tailwind.config.cjs` | nuevo | -0 | 0 |
-| 🆕 | `tsconfig.app.json` | nuevo | -0 | 0 |
-| 🆕 | `tsconfig.json` | nuevo | -0 | 0 |
-| 🆕 | `tsconfig.node.json` | nuevo | -0 | 0 |
-| 🆕 | `vite.config.ts` | nuevo | -0 | 0 |
-| ✏️ | `README.md` | +0 | -0 | 0 |
-
-### 📁 Lista completa
-
-<details>
-<summary>Ver todos los archivos (28)</summary>
-
-**🆕 Nuevos:**
-```
-.env.example
-.gitignore
-ONE_SPEC.md
-eslint.config.js
-index.html
-monitor.cjs
-package.json
-pnpm-lock.yaml
-postcss.config.cjs
-public/vite.svg
-src/App.css
-src/App.tsx
-src/assets/react.svg
-src/components/README.md
-src/hooks/README.md
-src/index.css
-src/lib/README.md
-src/main.tsx
-src/pages/README.md
-src/routes/README.md
-src/services/README.md
-src/styles/global.css
-tailwind.config.cjs
-tsconfig.app.json
-tsconfig.json
-tsconfig.node.json
-vite.config.ts
-```
-
-**✏️ Modificados:**
-```
-README.md
-```
-
-</details>
-
----
-
-## 🕐 10/03/2026, 13:47:54
+## 🕐 10/03/2026, 13:52:18
 
 ### 📊 Resumen
-- **Total archivos:** 27
-- **📝 Nuevos:** 26
-- **✏️ Modificados:** 1
-- **🗑️ Eliminados:** 0
-- **Líneas añadidas:** +0
-- **Líneas eliminadas:** -0
-- **Balance neto:** 0 líneas
-
-### 📝 Detalle por archivo
-
-| Estado | Archivo | Añadidas | Eliminadas | Neto |
-|--------|---------|----------|------------|------|
-| 🆕 | `.env.example` | nuevo | -0 | 0 |
-| 🆕 | `.gitignore` | nuevo | -0 | 0 |
-| 🆕 | `ONE_SPEC.md` | nuevo | -0 | 0 |
-| 🆕 | `eslint.config.js` | nuevo | -0 | 0 |
-| 🆕 | `index.html` | nuevo | -0 | 0 |
-| 🆕 | `monitor.cjs` | nuevo | -0 | 0 |
-| 🆕 | `package.json` | nuevo | -0 | 0 |
-| 🆕 | `pnpm-lock.yaml` | nuevo | -0 | 0 |
-| 🆕 | `postcss.config.cjs` | nuevo | -0 | 0 |
-| 🆕 | `public/vite.svg` | nuevo | -0 | 0 |
-| 🆕 | `src/App.css` | nuevo | -0 | 0 |
-| 🆕 | `src/App.tsx` | nuevo | -0 | 0 |
-| 🆕 | `src/assets/react.svg` | nuevo | -0 | 0 |
-| 🆕 | `src/components/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/hooks/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/index.css` | nuevo | -0 | 0 |
-| 🆕 | `src/lib/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/main.tsx` | nuevo | -0 | 0 |
-| 🆕 | `src/routes/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/services/README.md` | nuevo | -0 | 0 |
-| 🆕 | `src/styles/global.css` | nuevo | -0 | 0 |
-| 🆕 | `tailwind.config.cjs` | nuevo | -0 | 0 |
-| 🆕 | `tsconfig.app.json` | nuevo | -0 | 0 |
-| 🆕 | `tsconfig.json` | nuevo | -0 | 0 |
-| 🆕 | `tsconfig.node.json` | nuevo | -0 | 0 |
-| 🆕 | `vite.config.ts` | nuevo | -0 | 0 |
-| ✏️ | `README.md` | +0 | -0 | 0 |
-
-### 📁 Lista completa
-
-<details>
-<summary>Ver todos los archivos (27)</summary>
-
-**🆕 Nuevos:**
-```
-.env.example
-.gitignore
-ONE_SPEC.md
-eslint.config.js
-index.html
-monitor.cjs
-package.json
-pnpm-lock.yaml
-postcss.config.cjs
-public/vite.svg
-src/App.css
-src/App.tsx
-src/assets/react.svg
-src/components/README.md
-src/hooks/README.md
-src/index.css
-src/lib/README.md
-src/main.tsx
-src/routes/README.md
-src/services/README.md
-src/styles/global.css
-tailwind.config.cjs
-tsconfig.app.json
-tsconfig.json
-tsconfig.node.json
-vite.config.ts
-```
-
-**✏️ Modificados:**
-```
-README.md
-```
-
-</details>
-
----
-
-## 🕐 10/03/2026, 13:48:56
-
-### 📊 Resumen
-- **Total archivos:** 27
+- **Total archivos:** 1
 - **📝 Nuevos:** 0
-- **✏️ Modificados:** 27
+- **✏️ Modificados:** 1
 - **🗑️ Eliminados:** 0
-- **✅ En staging:** 27 (listos para commit)
-- **Líneas añadidas:** +4520
-- **Líneas eliminadas:** -0
-- **Balance neto:** +4520 líneas
+- **Líneas añadidas:** +54
+- **Líneas eliminadas:** -10
+- **Balance neto:** +44 líneas
 
 ### 📝 Detalle por archivo
 
 | Estado | Archivo | Añadidas | Eliminadas | Neto |
 |--------|---------|----------|------------|------|
-| ✅ ✏️ | `pnpm-lock.yaml` | +3768 | -0 | +3768 |
-| ✅ ✏️ | `monitor.cjs` | +375 | -0 | +375 |
-| ✅ ✏️ | `src/index.css` | +68 | -0 | +68 |
-| ✅ ✏️ | `package.json` | +42 | -0 | +42 |
-| ✅ ✏️ | `src/App.css` | +42 | -0 | +42 |
-| ✅ ✏️ | `src/App.tsx` | +35 | -0 | +35 |
-| ✅ ✏️ | `.gitignore` | +30 | -0 | +30 |
-| ✅ ✏️ | `tsconfig.app.json` | +28 | -0 | +28 |
-| ✅ ✏️ | `tsconfig.node.json` | +26 | -0 | +26 |
-| ✅ ✏️ | `eslint.config.js` | +23 | -0 | +23 |
-| ✅ ✏️ | `ONE_SPEC.md` | +21 | -0 | +21 |
-| ✅ ✏️ | `index.html` | +13 | -0 | +13 |
-| ✅ ✏️ | `src/main.tsx` | +10 | -0 | +10 |
-| ✅ ✏️ | `postcss.config.cjs` | +7 | -0 | +7 |
-| ✅ ✏️ | `tsconfig.json` | +7 | -0 | +7 |
-| ✅ ✏️ | `vite.config.ts` | +7 | -0 | +7 |
-| ✅ ✏️ | `src/styles/global.css` | +5 | -0 | +5 |
-| ✅ ✏️ | `tailwind.config.cjs` | +5 | -0 | +5 |
-| ✅ ✏️ | `.env.example` | +1 | -0 | +1 |
-| ✅ ✏️ | `public/vite.svg` | +1 | -0 | +1 |
-| ✅ ✏️ | `src/assets/react.svg` | +1 | -0 | +1 |
-| ✅ ✏️ | `src/components/README.md` | +1 | -0 | +1 |
-| ✅ ✏️ | `src/hooks/README.md` | +1 | -0 | +1 |
-| ✅ ✏️ | `src/lib/README.md` | +1 | -0 | +1 |
-| ✅ ✏️ | `src/routes/README.md` | +1 | -0 | +1 |
-| ✅ ✏️ | `src/services/README.md` | +1 | -0 | +1 |
-| ✅ ✏️ | `README.md` | +0 | -0 | 0 |
+| ✏️ | `ONE_SPEC.md` | +54 | -10 | +44 |
 
 ### 📁 Lista completa
 
 <details>
-<summary>Ver todos los archivos (27)</summary>
+<summary>Ver todos los archivos (1)</summary>
+
+**✏️ Modificados:**
+```
+ONE_SPEC.md
+```
+
+</details>
+
+---
+
+## 🕐 10/03/2026, 13:52:43
+
+### 📊 Resumen
+- **Total archivos:** 2
+- **📝 Nuevos:** 0
+- **✏️ Modificados:** 2
+- **🗑️ Eliminados:** 0
+- **Líneas añadidas:** +57
+- **Líneas eliminadas:** -10
+- **Balance neto:** +47 líneas
+
+### 📝 Detalle por archivo
+
+| Estado | Archivo | Añadidas | Eliminadas | Neto |
+|--------|---------|----------|------------|------|
+| ✏️ | `ONE_SPEC.md` | +54 | -10 | +44 |
+| ✏️ | `.gitignore` | +3 | -0 | +3 |
+
+### 📁 Lista completa
+
+<details>
+<summary>Ver todos los archivos (2)</summary>
+
+**✏️ Modificados:**
+```
+ONE_SPEC.md
+.gitignore
+```
+
+</details>
+
+---
+
+## 🕐 10/03/2026, 13:56:16
+
+### 📊 Resumen
+- **Total archivos:** 8
+- **📝 Nuevos:** 6
+- **✏️ Modificados:** 2
+- **🗑️ Eliminados:** 0
+- **Líneas añadidas:** +57
+- **Líneas eliminadas:** -10
+- **Balance neto:** +47 líneas
+
+### 📝 Detalle por archivo
+
+| Estado | Archivo | Añadidas | Eliminadas | Neto |
+|--------|---------|----------|------------|------|
+| 🆕 | `src/pages/AdminUsers.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/CreatePassword.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/Dashboard.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/ForgotPassword.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/Login.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/ResetPassword.tsx` | nuevo | -0 | 0 |
+| ✏️ | `ONE_SPEC.md` | +54 | -10 | +44 |
+| ✏️ | `.gitignore` | +3 | -0 | +3 |
+
+### 📁 Lista completa
+
+<details>
+<summary>Ver todos los archivos (8)</summary>
+
+**🆕 Nuevos:**
+```
+src/pages/AdminUsers.tsx
+src/pages/CreatePassword.tsx
+src/pages/Dashboard.tsx
+src/pages/ForgotPassword.tsx
+src/pages/Login.tsx
+src/pages/ResetPassword.tsx
+```
+
+**✏️ Modificados:**
+```
+ONE_SPEC.md
+.gitignore
+```
+
+</details>
+
+---
+
+## 🕐 10/03/2026, 13:56:25
+
+### 📊 Resumen
+- **Total archivos:** 9
+- **📝 Nuevos:** 6
+- **✏️ Modificados:** 3
+- **🗑️ Eliminados:** 0
+- **Líneas añadidas:** +115
+- **Líneas eliminadas:** -40
+- **Balance neto:** +75 líneas
+
+### 📝 Detalle por archivo
+
+| Estado | Archivo | Añadidas | Eliminadas | Neto |
+|--------|---------|----------|------------|------|
+| 🆕 | `src/pages/AdminUsers.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/CreatePassword.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/Dashboard.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/ForgotPassword.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/Login.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/ResetPassword.tsx` | nuevo | -0 | 0 |
+| ✏️ | `src/App.tsx` | +58 | -30 | +28 |
+| ✏️ | `ONE_SPEC.md` | +54 | -10 | +44 |
+| ✏️ | `.gitignore` | +3 | -0 | +3 |
+
+### 📁 Lista completa
+
+<details>
+<summary>Ver todos los archivos (9)</summary>
+
+**🆕 Nuevos:**
+```
+src/pages/AdminUsers.tsx
+src/pages/CreatePassword.tsx
+src/pages/Dashboard.tsx
+src/pages/ForgotPassword.tsx
+src/pages/Login.tsx
+src/pages/ResetPassword.tsx
+```
+
+**✏️ Modificados:**
+```
+src/App.tsx
+ONE_SPEC.md
+.gitignore
+```
+
+</details>
+
+---
+
+## 🕐 10/03/2026, 14:05:12
+
+### 📊 Resumen
+- **Total archivos:** 8
+- **📝 Nuevos:** 6
+- **✏️ Modificados:** 2
+- **🗑️ Eliminados:** 0
+- **Líneas añadidas:** +61
+- **Líneas eliminadas:** -30
+- **Balance neto:** +31 líneas
+
+### 📝 Detalle por archivo
+
+| Estado | Archivo | Añadidas | Eliminadas | Neto |
+|--------|---------|----------|------------|------|
+| 🆕 | `src/pages/AdminUsers.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/CreatePassword.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/Dashboard.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/ForgotPassword.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/Login.tsx` | nuevo | -0 | 0 |
+| 🆕 | `src/pages/ResetPassword.tsx` | nuevo | -0 | 0 |
+| ✏️ | `src/App.tsx` | +58 | -30 | +28 |
+| ✏️ | `.gitignore` | +3 | -0 | +3 |
+
+### 📁 Lista completa
+
+<details>
+<summary>Ver todos los archivos (8)</summary>
+
+**🆕 Nuevos:**
+```
+src/pages/AdminUsers.tsx
+src/pages/CreatePassword.tsx
+src/pages/Dashboard.tsx
+src/pages/ForgotPassword.tsx
+src/pages/Login.tsx
+src/pages/ResetPassword.tsx
+```
+
+**✏️ Modificados:**
+```
+src/App.tsx
+.gitignore
+```
+
+</details>
+
+---
+
+## 🕐 10/03/2026, 14:06:48
+
+### 📊 Resumen
+- **Total archivos:** 8
+- **📝 Nuevos:** 0
+- **✏️ Modificados:** 8
+- **🗑️ Eliminados:** 0
+- **✅ En staging:** 8 (listos para commit)
+- **Líneas añadidas:** +80
+- **Líneas eliminadas:** -30
+- **Balance neto:** +50 líneas
+
+### 📝 Detalle por archivo
+
+| Estado | Archivo | Añadidas | Eliminadas | Neto |
+|--------|---------|----------|------------|------|
+| ✅ ✏️ | `src/App.tsx` | +58 | -30 | +28 |
+| ✅ ✏️ | `src/pages/ResetPassword.tsx` | +4 | -0 | +4 |
+| ✅ ✏️ | `.gitignore` | +3 | -0 | +3 |
+| ✅ ✏️ | `src/pages/AdminUsers.tsx` | +3 | -0 | +3 |
+| ✅ ✏️ | `src/pages/CreatePassword.tsx` | +3 | -0 | +3 |
+| ✅ ✏️ | `src/pages/Dashboard.tsx` | +3 | -0 | +3 |
+| ✅ ✏️ | `src/pages/ForgotPassword.tsx` | +3 | -0 | +3 |
+| ✅ ✏️ | `src/pages/Login.tsx` | +3 | -0 | +3 |
+
+### 📁 Lista completa
+
+<details>
+<summary>Ver todos los archivos (8)</summary>
 
 **✅ Modificados (staged):**
 ```
-pnpm-lock.yaml
-monitor.cjs
-src/index.css
-package.json
-src/App.css
 src/App.tsx
+src/pages/ResetPassword.tsx
 .gitignore
-tsconfig.app.json
-tsconfig.node.json
-eslint.config.js
-ONE_SPEC.md
-index.html
-src/main.tsx
-postcss.config.cjs
-tsconfig.json
-vite.config.ts
-src/styles/global.css
-tailwind.config.cjs
-.env.example
-public/vite.svg
-src/assets/react.svg
-src/components/README.md
-src/hooks/README.md
-src/lib/README.md
-src/routes/README.md
-src/services/README.md
-README.md
+src/pages/AdminUsers.tsx
+src/pages/CreatePassword.tsx
+src/pages/Dashboard.tsx
+src/pages/ForgotPassword.tsx
+src/pages/Login.tsx
 ```
 
 </details>
