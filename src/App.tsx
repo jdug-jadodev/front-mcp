@@ -6,6 +6,7 @@ import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import AdminUsers from './pages/AdminUsers';
+import { isAuthenticated } from './lib/api';
 
 // Layout base reutilizable
 const BaseLayout: React.FC = () => (
@@ -17,11 +18,6 @@ const BaseLayout: React.FC = () => (
     <footer className="bg-gray-100 text-center p-2 text-xs">&copy; 2026 MCP</footer>
   </div>
 );
-
-// Simulación de autenticación (reemplazar por lógica real en fases siguientes)
-const isAuthenticated = () => {
-  return Boolean(localStorage.getItem('token'));
-};
 
 // Ruta privada
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
