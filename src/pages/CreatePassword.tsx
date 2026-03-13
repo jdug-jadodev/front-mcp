@@ -13,6 +13,8 @@ const CreatePassword: React.FC = () => {
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
 	const token = searchParams.get('token');
+	const [verified, setVerified] = useState<boolean | null>(null);
+	const [verifying, setVerifying] = useState(false);
 
 	const { locked, remainingMs, start } = useRequestLock();
 
@@ -28,12 +30,46 @@ const CreatePassword: React.FC = () => {
 		return () => clearTimeout(t);
 	}, [password]);
 
+	// Verify token with backend before rendering form
+	useEffect(() => {
+		let mounted = true;
+		const doVerify = async () => {
+			if (!token) {
+				if (mounted) setVerified(false);
+				return;
+			}
+			setVerifying(true);
+			try {
+				const res = await authService.verifyResetToken(token);
+				if ((res as any).status === 'success') {
+					if (mounted) setVerified(true);
+					// Clean token from URL
+					try {
+						window.history.replaceState(null, '', window.location.pathname);
+					} catch {}
+				} else {
+					if (mounted) setVerified(false);
+				}
+			} catch (e) {
+				if (mounted) setVerified(false);
+			} finally {
+				if (mounted) setVerifying(false);
+			}
+		};
+		doVerify();
+		return () => { mounted = false; };
+	}, [token]);
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError('');
 		if (!token) {
 			setError('Token inválido o expirado');
 			navigate('/forgot-password');
+			return;
+		}
+		if (verified === false) {
+			setError('Enlace inválido o expirado');
 			return;
 		}
 		if (!validation.ok) {
@@ -76,6 +112,19 @@ const CreatePassword: React.FC = () => {
 			setLoading(false);
 		}
 	};
+
+	if (verifying) {
+		return <div className="max-w-sm mx-auto p-4 bg-white rounded shadow">Verificando enlace...</div>;
+	}
+
+	if (verified === false) {
+		return (
+			<div className="max-w-sm mx-auto p-4 bg-white rounded shadow">
+				<div className="text-red-600">Enlace inválido o expirado. Solicita un nuevo enlace.</div>
+				<button className="mt-4 bg-blue-600 text-white p-2 rounded" onClick={() => navigate('/forgot-password')}>Solicitar nuevo enlace</button>
+			</div>
+		);
+	}
 
 	return (
 		<form onSubmit={handleSubmit} className="max-w-sm mx-auto p-4 bg-white rounded shadow">

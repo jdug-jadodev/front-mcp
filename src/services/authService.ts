@@ -61,6 +61,10 @@ export const authService = {
     return api.post<{ token: string; password: string }, CreatePasswordSuccess | ErrorResponse>('/auth/create-password', { token, password });
   },
 
+  async verifyResetToken(token: string): Promise<{ status: 'success' } | ErrorResponse> {
+    return api.post<{ token: string }, { status: 'success' } | ErrorResponse>('/auth/verify-reset-token', { token });
+  },
+
   async forgotPassword(email: string): Promise<ForgotPasswordSuccess | ErrorResponse> {
     return api.post<{ email: string }, ForgotPasswordSuccess | ErrorResponse>('/auth/forgot-password', { email });
   },
