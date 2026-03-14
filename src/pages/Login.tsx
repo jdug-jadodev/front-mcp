@@ -1,62 +1,75 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
-import { saveAuth } from '../lib/api';
+import React, { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import Card from '../components/Card'
+import Input from '../components/Input'
+import Button from '../components/Button'
+import FormError from '../components/FormError'
+import { authService } from '../services/authService'
+import { saveAuth, type AuthUser } from '../lib/api'
 
-const Login = () => {
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
-	const [error, setError] = useState('');
-	const [loading, setLoading] = useState(false);
-	const navigate = useNavigate();
+export default function LoginPage() {
+	const [email, setEmail] = useState('')
+	const [password, setPassword] = useState('')
+	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState<string | null>(null)
+	const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
+	const emailRef = useRef<HTMLInputElement | null>(null)
+	const navigate = useNavigate()
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError('');
-		setLoading(true);
+	useEffect(() => {
+		emailRef.current?.focus()
+	}, [])
+
+	const validate = () => {
+		const errs: typeof fieldErrors = {}
+		if (!email.trim()) errs.email = 'Correo requerido'
+		else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errs.email = 'Email inválido'
+		if (!password) errs.password = 'Contraseña requerida'
+		setFieldErrors(errs)
+		return Object.keys(errs).length === 0
+	}
+
+	async function handleSubmit(e: React.FormEvent) {
+		e.preventDefault()
+		setError(null)
+		if (!validate()) return
+		setLoading(true)
 		try {
-			const result = await authService.login(email, password);
-			if (result.status === 'success') {
-				saveAuth(result.token, result.user);
-				navigate('/dashboard');
+			const res = await authService.login(email, password)
+			if ((res as { status: string }).status === 'success') {
+				const ok = res as { token: string; user: AuthUser }
+				saveAuth(ok.token, ok.user)
+				navigate('/dashboard')
 			} else {
-				setError(result.message || 'Credenciales incorrectas');
+				setError((res as { message?: string }).message || 'Credenciales incorrectas')
 			}
-		} catch {
-			setError('Error de conexión');
+		} catch (err: unknown) {
+			if (err instanceof Error) {
+				setError(err.message || 'Error de conexión')
+			} else {
+				setError('Error de conexión')
+			}
 		} finally {
-			setLoading(false);
+			setLoading(false)
 		}
-	};
+	}
 
 	return (
-		<form onSubmit={handleSubmit} className="max-w-sm mx-auto p-4 bg-white rounded shadow">
-			<h1 className="text-xl mb-4">Iniciar Sesión</h1>
-			{error && <div className="text-red-600 mb-2">{error}</div>}
-			<input
-				type="email"
-				placeholder="Email"
-				value={email}
-				onChange={e => setEmail(e.target.value)}
-				className="w-full mb-2 p-2 border rounded"
-				required
-			/>
-			<input
-				type="password"
-				placeholder="Contraseña"
-				value={password}
-				onChange={e => setPassword(e.target.value)}
-				className="w-full mb-2 p-2 border rounded"
-				required
-			/>
-			<button type="submit" className="w-full bg-blue-600 text-white p-2 rounded" disabled={loading}>
-				{loading ? 'Cargando...' : 'Iniciar Sesión'}
-			</button>
-			<div className="mt-2 text-center">
-				<a href="/forgot-password" className="text-blue-600 text-sm">¿Olvidaste tu contraseña?</a>
-			</div>
-		</form>
-	);
-};
-
-export default Login;
+		<div className="min-h-screen flex items-center justify-center px-4 py-8">
+			<Card className="w-full max-w-md">
+				<form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+					<h2 className="text-2xl font-semibold">Iniciar sesión</h2>
+					<FormError message={error} />
+					<Input ref={emailRef} id="login-email" label="Correo" value={email} onChange={setEmail} type="email" error={fieldErrors.email} />
+					<Input id="login-password" label="Contraseña" value={password} onChange={setPassword} type="password" error={fieldErrors.password} showPasswordToggle />
+					<div className="flex items-center justify-between">
+						<a href="/forgot-password" className="text-sm text-brand-primary-600 hover:underline">¿Olvidaste tu contraseña?</a>
+					</div>
+					<Button type="submit" loading={loading}>
+						Entrar
+					</Button>
+				</form>
+			</Card>
+		</div>
+	)
+}
