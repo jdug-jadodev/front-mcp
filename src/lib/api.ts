@@ -16,7 +16,11 @@ export const api = {
     const token = getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const response = await fetch(`${this.baseURL}${endpoint}`, {
+    const url = typeof endpoint === 'string' && (endpoint.startsWith('http://') || endpoint.startsWith('https://'))
+      ? endpoint
+      : `${this.baseURL}${endpoint}`;
+
+    const response = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(data)
