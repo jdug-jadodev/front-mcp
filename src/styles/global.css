@@ -1,5 +1,253 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Global overrides for the project */
+/* ========================================
+   THEME CUSTOMIZATION (Tailwind v4)
+   ======================================== */
+
+@theme {
+  /* Neo-Modern Color Palette */
+  --color-brand-primary-50: #ecfeff;
+  --color-brand-primary-100: #cffafe;
+  --color-brand-primary-200: #a5f3fc;
+  --color-brand-primary-300: #67e8f9;
+  --color-brand-primary-400: #22d3ee;
+  --color-brand-primary-500: #06b6d4;
+  --color-brand-primary-600: #0891b2;
+  --color-brand-primary-700: #0e7490;
+  --color-brand-primary-800: #155e75;
+  --color-brand-primary-900: #164e63;
+
+  --color-brand-accent-purple-400: #c084fc;
+  --color-brand-accent-purple-500: #a855f7;
+  --color-brand-accent-purple-600: #9333ea;
+
+  --color-brand-accent-pink-400: #f472b6;
+  --color-brand-accent-pink-500: #ec4899;
+  --color-brand-accent-pink-600: #db2777;
+
+  /* Shadows & Effects */
+  --shadow-glow-sm: 0 0 10px rgb(6 182 212 / 0.3);
+  --shadow-glow: 0 0 20px rgb(6 182 212 / 0.5);
+  --shadow-glow-lg: 0 0 30px rgb(6 182 212 / 0.6);
+  --shadow-glass: 0 8px 32px 0 rgb(31 38 135 / 0.37);
+  --shadow-card-modern: 0 10px 40px rgb(0 0 0 / 0.2);
+  --shadow-card-hover: 0 15px 50px rgb(0 0 0 / 0.3);
+
+  /* Animations */
+  --animate-gradient-shift: gradient-shift 15s ease infinite;
+  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
+  --animate-shake: shake 0.5s ease-in-out;
+}
+
+/* ========================================
+   KEYFRAMES
+   ======================================== */
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgb(6 182 212 / 0.4); }
+  50% { box-shadow: 0 0 30px rgb(6 182 212 / 0.8); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in-from-top {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   GLOBAL BASE STYLES
+   ======================================== */
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* ========================================
+   CUSTOM UTILITIES
+   ======================================== */
+
+@utility glass {
+  background: rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgb(255 255 255 / 0.18);
+}
+
+@utility glass-strong {
+  background: rgb(255 255 255 / 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgb(255 255 255 / 0.25);
+}
+
+@utility gradient-text {
+  background: linear-gradient(to right, #22d3ee, #a855f7, #ec4899);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility glow-cyan {
+  box-shadow: 0 0 20px rgb(6 182 212 / 0.5);
+}
+
+@utility glow-purple {
+  box-shadow: 0 0 20px rgb(168 85 247 / 0.5);
+}
+
+@utility bg-gradient-animated {
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #581c87, #1e293b);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+@utility animate-in {
+  animation-fill-mode: both;
+}
+
+@utility fade-in {
+  animation-name: fade-in;
+}
+
+@utility slide-in-from-top {
+  animation-name: slide-in-from-top;
+}
+
+@utility slide-in-from-bottom {
+  animation-name: slide-in-from-bottom;
+}
+
+@utility slide-in-from-top-2 {
+  animation-name: slide-in-from-top;
+}
+
+@utility duration-200 {
+  animation-duration: 200ms;
+}
+
+@utility duration-300 {
+  animation-duration: 300ms;
+}
+
+@utility duration-500 {
+  animation-duration: 500ms;
+}
+
+@utility duration-700 {
+  animation-duration: 700ms;
+}
+
+@utility duration-1000 {
+  animation-duration: 1000ms;
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .bg-gradient-animated {
+    animation: none !important;
+  }
+}
+
+*:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
+/* ========================================
+   SCROLLBAR & SELECTION
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+::selection {
+  background: rgb(6 182 212 / 0.3);
+  color: white;
+}
+
+::-moz-selection {
+  background: rgb(6 182 212 / 0.3);
+  color: white;
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+  .bg-gradient-animated,
+  .glass,
+  .glass-strong {
+    background: white !important;
+    backdrop-filter: none !important;
+  }
+}

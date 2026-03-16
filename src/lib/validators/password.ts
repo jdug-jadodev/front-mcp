@@ -48,8 +48,8 @@ export function validatePasswordRules(password: string, options: Options = {}): 
           break;
         }
       }
-    } catch {
-        console.error('Error al validar contra el email:', options.email);
+    } catch (e) {
+      console.error('Error al validar contraseña:', e instanceof Error ? e.message : 'unknown');
     }
   }
 

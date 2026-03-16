@@ -8,14 +8,28 @@ import Dashboard from './pages/Dashboard';
 import AdminUsers from './pages/AdminUsers';
 import { isAuthenticated } from './lib/api';
 
-// Layout base reutilizable
+// Layout base modernizado
 const BaseLayout: React.FC = () => (
-  <div className="min-h-screen flex flex-col">
-    <header className="bg-gray-800 text-white p-4">MCP Auth</header>
-    <main className="flex-1 p-4">
+  <div className="min-h-screen flex flex-col bg-slate-900 text-slate-50">
+    <header className="glass border-b border-white/10 shadow-glass">
+      <div className="container mx-auto px-4 py-4">
+        <h1 className="text-xl font-bold gradient-text">
+          MCP Auth
+        </h1>
+      </div>
+    </header>
+    
+    <main className="flex-1">
       <Outlet />
     </main>
-    <footer className="bg-gray-100 text-center p-2 text-xs">&copy; 2026 MCP</footer>
+    
+    <footer className="glass border-t border-white/10 py-4">
+      <div className="container mx-auto px-4">
+        <p className="text-center text-xs text-slate-400">
+          &copy; 2026 MCP • Todos los derechos reservados
+        </p>
+      </div>
+    </footer>
   </div>
 );
 

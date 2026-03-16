@@ -6,10 +6,27 @@ export interface CardProps {
   ariaLabel?: string
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', ariaLabel }) => {
+export const Card: React.FC<CardProps> = ({ 
+  children, 
+  className = '', 
+  ariaLabel 
+}) => {
   return (
     <div
-      className={`bg-white/80 backdrop-blur-sm rounded-lg shadow-card p-6 max-w-sm w-full ${className}`}
+      className={`
+        glass-strong
+        rounded-2xl 
+        shadow-glass
+        p-8
+        sm:p-10
+        max-w-md
+        w-full
+        border border-white/20
+        transition-all
+        duration-300
+        hover:shadow-card-hover
+        ${className}
+      `}
       aria-label={ariaLabel}
     >
       {children}
