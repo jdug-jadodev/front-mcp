@@ -13,7 +13,7 @@ const Dashboard = () => {
 		// Hide welcome message after 3 seconds
 		const timer = setTimeout(() => {
 			setShowWelcome(false);
-		}, 3000);
+		}, 5000);
 		return () => clearTimeout(timer);
 	}, []);
 
@@ -21,13 +21,6 @@ const Dashboard = () => {
 		clearAuth();
 		navigate('/login');
 	};
-
-	const stats = [
-		{ label: 'Sesiones Activas', value: '1', icon: '🔐', color: 'from-cyan-500 to-blue-500' },
-		{ label: 'Última Actividad', value: 'Ahora', icon: '⏰', color: 'from-purple-500 to-pink-500' },
-		{ label: 'Nivel de Seguridad', value: 'Alto', icon: '🛡️', color: 'from-emerald-500 to-teal-500' },
-		{ label: 'Notificaciones', value: '0', icon: '🔔', color: 'from-amber-500 to-orange-500' },
-	];
 
 	return (
 		<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -75,121 +68,7 @@ const Dashboard = () => {
 							Cerrar Sesión
 						</Button>
 					</div>
-
-					{/* Stats Grid */}
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-						{stats.map((stat, index) => (
-							<div
-								key={stat.label}
-								className="glass rounded-xl p-4 hover:glass-strong transition-all duration-300 hover:scale-105 cursor-pointer"
-								style={{
-									animationDelay: `${index * 100}ms`,
-								}}
-							>
-								<div className="flex items-center justify-between mb-2">
-									<span className="text-3xl">{stat.icon}</span>
-									<div className={`w-2 h-2 rounded-full bg-linear-to-r ${stat.color}`} />
-								</div>
-								<p className="text-slate-400 text-xs mb-1">{stat.label}</p>
-								<p className="text-white text-2xl font-bold">{stat.value}</p>
-							</div>
-						))}
-					</div>
-
-					{/* Quick Actions */}
-					<div className="space-y-4">
-						<h3 className="text-lg font-semibold text-white mb-4">
-							Acciones Rápidas
-						</h3>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<button className="glass rounded-xl p-4 text-left hover:glass-strong transition-all duration-300 hover:scale-[1.02] group">
-								<div className="flex items-center gap-3">
-									<div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-										⚙️
-									</div>
-									<div>
-										<p className="text-white font-semibold">Configuración</p>
-										<p className="text-slate-400 text-sm">Personaliza tu cuenta</p>
-									</div>
-								</div>
-							</button>
-
-							<button className="glass rounded-xl p-4 text-left hover:glass-strong transition-all duration-300 hover:scale-[1.02] group">
-								<div className="flex items-center gap-3">
-									<div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-										🔒
-									</div>
-									<div>
-										<p className="text-white font-semibold">Seguridad</p>
-										<p className="text-slate-400 text-sm">Gestiona tu privacidad</p>
-									</div>
-								</div>
-							</button>
-
-							<button className="glass rounded-xl p-4 text-left hover:glass-strong transition-all duration-300 hover:scale-[1.02] group">
-								<div className="flex items-center gap-3">
-									<div className="w-12 h-12 rounded-lg bg-pink-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-										📊
-									</div>
-									<div>
-										<p className="text-white font-semibold">Estadísticas</p>
-										<p className="text-slate-400 text-sm">Ver actividad reciente</p>
-									</div>
-								</div>
-							</button>
-
-							<button className="glass rounded-xl p-4 text-left hover:glass-strong transition-all duration-300 hover:scale-[1.02] group">
-								<div className="flex items-center gap-3">
-									<div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-										💬
-									</div>
-									<div>
-										<p className="text-white font-semibold">Soporte</p>
-										<p className="text-slate-400 text-sm">Obtén ayuda</p>
-									</div>
-								</div>
-							</button>
-						</div>
-					</div>
 				</Card>
-
-				{/* Activity Timeline */}
-				<Card className="animate-in slide-in-from-bottom duration-1000">
-					<h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-						<span className="text-2xl">📝</span>
-						Actividad Reciente
-					</h3>
-					<div className="space-y-4">
-						<div className="flex items-start gap-4 glass-strong rounded-lg p-3">
-							<div className="w-10 h-10 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 flex items-center justify-center shrink-0">
-								✓
-							</div>
-							<div className="flex-1">
-								<p className="text-white font-medium">Inicio de sesión exitoso</p>
-								<p className="text-slate-400 text-sm">Hace unos momentos • IP: {user?.email ? '***' : 'Desconocida'}</p>
-							</div>
-							<span className="text-xs text-cyan-400 font-semibold">AHORA</span>
-						</div>
-
-						<div className="flex items-start gap-4 glass rounded-lg p-3 opacity-60">
-							<div className="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
-								🔐
-							</div>
-							<div className="flex-1">
-								<p className="text-white font-medium">Cuenta verificada</p>
-								<p className="text-slate-400 text-sm">Última actualización de seguridad</p>
-							</div>
-							<span className="text-xs text-slate-500 font-semibold">RECIENTE</span>
-						</div>
-					</div>
-				</Card>
-
-				{/* Footer Info */}
-				<div className="mt-8 text-center">
-					<p className="text-slate-500 text-sm">
-						Sistema de autenticación seguro • MCP Auth v2.0
-					</p>
-				</div>
 			</div>
 		</div>
 	);

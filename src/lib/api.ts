@@ -64,14 +64,27 @@ let inMemoryAuthToken: string | null = null;
 export const saveAuth = (token: string, user: AuthUser) => {
   inMemoryAuthToken = token; // TODO: migrate to HttpOnly cookie (backend)
   try {
-    // Persist only user metadata for UX; avoid storing token in localStorage
+    // Persist token so session survives page reloads in dev/SPA environments
+    localStorage.setItem('authToken', token);
     localStorage.setItem('user', JSON.stringify(user));
   } catch {
-    // ignore
+    // ignore storage errors
   }
 };
 
-export const getToken = () => inMemoryAuthToken;
+export const getToken = () => {
+  if (inMemoryAuthToken) return inMemoryAuthToken;
+  try {
+    const stored = localStorage.getItem('authToken');
+    if (stored) {
+      inMemoryAuthToken = stored;
+      return inMemoryAuthToken;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+};
 
 export const getUser = () => {
   const user = localStorage.getItem('user');
@@ -83,6 +96,7 @@ export const clearAuth = () => {
   try {
     // Remove legacy auth token keys if present (do not persist tokens anymore)
     localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
   } catch {
     // ignore
   }
