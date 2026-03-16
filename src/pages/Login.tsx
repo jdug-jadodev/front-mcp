@@ -57,12 +57,15 @@ export default function LoginPage() {
 				
 				if (oauthRequest) {
 
-					console.log('OAuth request detected, calling callback with JWT...')
+					console.debug('OAuth request detected, calling callback with JWT')
+					console.debug('oauth_request:', oauthRequest)
+					console.debug('token present:', Boolean(ok.token))
 					try {
-						console.log("llanamando al oauth callback con el JWT:")
 						// Llamar al endpoint de OAuth callback con el JWT
 						const oauthRes = await authService.oauthCallback(oauthRequest, ok.token)
-						
+						// Registrar resultado para diagnóstico
+						console.debug('oauthCallback response:', oauthRes)
+				
 						if ((oauthRes as { status: string }).status === 'success') {
 							const oauthOk = oauthRes as { redirectUrl: string }
 							// Limpiar sessionStorage

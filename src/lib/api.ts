@@ -26,6 +26,16 @@ export const api = {
       body: JSON.stringify(data)
     });
 
+    // Debug: registrar solicitudes salientes para facilitar diagnóstico en el cliente
+    try {
+      // Mostrar en consola la URL y el payload (puede verse en DevTools Network/Console)
+      // No usar en producción de forma prolongada.
+      // eslint-disable-next-line no-console
+      console.debug('[api.post] POST', url, { headers, body: data });
+    } catch {
+      // ignore console errors
+    }
+
     if (response.status === 401) {
       clearAuth();
       window.location.href = '/login';
@@ -33,6 +43,13 @@ export const api = {
     }
 
     const text = await response.text();
+    // Debug: log de la respuesta bruta
+    try {
+      // eslint-disable-next-line no-console
+      console.debug('[api.post] Response', { url, status: response.status, body: text });
+    } catch {
+      // ignore
+    }
     let body: unknown = null;
     try {
       body = text ? JSON.parse(text) : null;
