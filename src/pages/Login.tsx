@@ -51,12 +51,20 @@ export default function LoginPage() {
 			if ((res as { status: string }).status === 'success') {
 				const ok = res as { token: string; user: AuthUser }
 				saveAuth(ok.token, ok.user)
-				
-				// Verificar si hay un oauth_request pendiente
-				const oauthRequest = sessionStorage.getItem('oauth_request')
-				
-				if (oauthRequest) {
 
+				// --- NUEVO: asegurar que oauth_request esté en sessionStorage si viene en la URL ---
+				let oauthRequest = sessionStorage.getItem('oauth_request')
+				if (!oauthRequest) {
+					const params = new URLSearchParams(window.location.search)
+					const oauthFromUrl = params.get('oauth_request')
+					if (oauthFromUrl) {
+						sessionStorage.setItem('oauth_request', oauthFromUrl)
+						oauthRequest = oauthFromUrl
+					}
+				}
+				console.log('OAuth request on login:', oauthRequest) // Debug
+
+				if (oauthRequest) {
 					console.debug('OAuth request detected, calling callback with JWT')
 					console.debug('oauth_request:', oauthRequest)
 					console.debug('token present:', Boolean(ok.token))
@@ -65,7 +73,7 @@ export default function LoginPage() {
 						const oauthRes = await authService.oauthCallback(oauthRequest, ok.token)
 						// Registrar resultado para diagnóstico
 						console.debug('oauthCallback response:', oauthRes)
-				
+
 						if ((oauthRes as { status: string }).status === 'success') {
 							const oauthOk = oauthRes as { redirectUrl: string }
 							// Limpiar sessionStorage
@@ -84,7 +92,7 @@ export default function LoginPage() {
 						sessionStorage.removeItem('oauth_request')
 					}
 				}
-				
+
 				// Navegación normal al dashboard si no hay OAuth o si falló
 				navigate('/dashboard')
 			} else {
