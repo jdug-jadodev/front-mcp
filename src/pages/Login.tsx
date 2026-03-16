@@ -17,6 +17,17 @@ export default function LoginPage() {
 	const errorRef = useRef<HTMLDivElement | null>(null)
 	const navigate = useNavigate()
 
+	// Detectar y guardar parámetro oauth_request
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search)
+		const oauthRequest = params.get('oauth_request')
+		
+		if (oauthRequest) {
+			// Guardar en sessionStorage para usarlo después del login
+			sessionStorage.setItem('oauth_request', oauthRequest)
+		}
+	}, [])
+
 	useEffect(() => {
 		emailRef.current?.focus()
 	}, [])
@@ -40,6 +51,35 @@ export default function LoginPage() {
 			if ((res as { status: string }).status === 'success') {
 				const ok = res as { token: string; user: AuthUser }
 				saveAuth(ok.token, ok.user)
+				
+				// Verificar si hay un oauth_request pendiente
+				const oauthRequest = sessionStorage.getItem('oauth_request')
+				
+				if (oauthRequest) {
+					try {
+						// Llamar al endpoint de OAuth callback con el JWT
+						const oauthRes = await authService.oauthCallback(oauthRequest, ok.token)
+						
+						if ((oauthRes as { status: string }).status === 'success') {
+							const oauthOk = oauthRes as { redirectUrl: string }
+							// Limpiar sessionStorage
+							sessionStorage.removeItem('oauth_request')
+							// Redirigir a la URL devuelta por el servidor
+							window.location.href = oauthOk.redirectUrl
+							return
+						} else {
+							// Si falla el OAuth, continuar al dashboard normal
+							console.error('OAuth callback failed:', oauthRes)
+							sessionStorage.removeItem('oauth_request')
+						}
+					} catch (oauthErr) {
+						// Si falla el OAuth, continuar al dashboard normal
+						console.error('OAuth callback error:', oauthErr)
+						sessionStorage.removeItem('oauth_request')
+					}
+				}
+				
+				// Navegación normal al dashboard si no hay OAuth o si falló
 				navigate('/dashboard')
 			} else {
 				setError((res as { message?: string }).message || 'Credenciales incorrectas')

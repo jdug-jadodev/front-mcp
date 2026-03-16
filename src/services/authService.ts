@@ -48,6 +48,11 @@ export interface RegisterEmailSuccess {
   emailSent: boolean;
 }
 
+export interface OAuthCallbackSuccess {
+  status: 'success';
+  redirectUrl: string;
+}
+
 export const authService = {
   async checkEmail(email: string): Promise<CheckEmailSuccess | ErrorResponse> {
     return api.post<{ email: string }, CheckEmailSuccess | ErrorResponse>('/auth/check-email', { email });
@@ -55,6 +60,10 @@ export const authService = {
 
   async login(email: string, password: string): Promise<LoginSuccess | ErrorResponse> {
     return api.post<{ email: string; password: string }, LoginSuccess | ErrorResponse>('/auth/login', { email, password });
+  },
+
+  async oauthCallback(oauthRequest: string, jwtToken: string): Promise<OAuthCallbackSuccess | ErrorResponse> {
+    return api.post<{ oauth_request: string; jwt: string }, OAuthCallbackSuccess | ErrorResponse>('/oauth/callback', { oauth_request: oauthRequest, jwt: jwtToken });
   },
 
   async createPassword(token: string, password: string): Promise<CreatePasswordSuccess | ErrorResponse> {
