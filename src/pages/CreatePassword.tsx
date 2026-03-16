@@ -1,17 +1,22 @@
-import React, { useEffect, useMemo, useState } from 'react';import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Card from '../components/Card';
+import Input from '../components/Input';
+import Button from '../components/Button';
+import FormError from '../components/FormError';
 import { authService } from '../services/authService';
 import { validatePasswordRules, calculatePasswordStrength } from '../lib/validators/password';
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 import { useRequestLock } from '../hooks/useRequestLock';
+import { useTokenFromUrl } from '../hooks/useTokenFromUrl';
 
 const CreatePassword: React.FC = () => {
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
-	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
-	const token = searchParams.get('token');
+	const token = useTokenFromUrl();
 	const [verified, setVerified] = useState<boolean | null>(null);
 	const [verifying, setVerifying] = useState(false);
 
@@ -42,12 +47,6 @@ const CreatePassword: React.FC = () => {
 				const res = await authService.verifyResetToken(token);
 				if (res.status === 'success') {
 					if (mounted) setVerified(true);
-					// Clean token from URL
-					try {
-						window.history.replaceState(null, '', window.location.pathname);
-					} catch (err) {
-						console.debug('Failed to remove token from URL', err);
-					}
 				} else {
 					if (mounted) setVerified(false);
 				}
@@ -117,58 +116,103 @@ const CreatePassword: React.FC = () => {
 	};
 
 	if (verifying) {
-		return <div className="max-w-sm mx-auto p-4 bg-white rounded shadow">Verificando enlace...</div>;
+		return (
+			<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12">
+				<Card>
+					<div className="text-center text-slate-300">Verificando enlace...</div>
+				</Card>
+			</div>
+		);
 	}
 
 	if (verified === false) {
 		return (
-			<div className="max-w-sm mx-auto p-4 bg-white rounded shadow">
-				<div className="text-red-600">Enlace inválido o expirado. Solicita un nuevo enlace.</div>
-				<button className="mt-4 bg-blue-600 text-white p-2 rounded" onClick={() => navigate('/forgot-password')}>Solicitar nuevo enlace</button>
+			<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
+				<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+				<div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
+				
+				<Card className="relative z-10">
+					<div className="text-center mb-6">
+						<h1 className="text-2xl font-bold gradient-text mb-2">Enlace Inválido</h1>
+						<p className="text-rose-300 mb-4">Enlace inválido o expirado. Solicita un nuevo enlace.</p>
+						<Button onClick={() => navigate('/forgot-password')}>
+							Solicitar nuevo enlace
+						</Button>
+					</div>
+				</Card>
 			</div>
 		);
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className="max-w-sm mx-auto p-4 bg-white rounded shadow">
-			<h1 className="text-xl mb-4">Crear Contraseña</h1>
-			<div className="text-xs mb-2 text-gray-600">
-				Requisitos mínimos: mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.
-			</div>
+		<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
+			{/* Decorative elements */}
+			<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+			<div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
+			
+			<Card className="relative z-10">
+				<form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
+					{/* Header */}
+					<div className="text-center mb-4">
+						<h1 className="text-3xl font-bold gradient-text mb-2">
+							Crear Contraseña
+						</h1>
+						<p className="text-slate-400 text-xs mb-2">
+							Requisitos mínimos: mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.
+						</p>
+					</div>
 
-			<div role="status" aria-live="polite" className="mb-2">
-				{error && <div className="text-red-600 mb-2">{error}</div>}
-			</div>
+					{/* Error message */}
+					<FormError message={error} />
 
-			<input
-				type="password"
-				placeholder="Nueva contraseña"
-				value={password}
-				onChange={e => setPassword(e.target.value)}
-				className="w-full mb-2 p-2 border rounded"
-				aria-describedby="password-hints"
-				required
-			/>
+					{/* Password input */}
+					<div className="space-y-2">
+						<Input
+							id="create-password"
+							label="Nueva contraseña"
+							value={password}
+							onChange={setPassword}
+							type="password"
+							placeholder="••••••••"
+							showPasswordToggle
+							icon={
+								<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+								</svg>
+							}
+						/>
+						
+						<PasswordStrengthMeter value={strength.score} level={strength.level} hints={validation.hints} />
+					</div>
 
-			<PasswordStrengthMeter value={strength.score} level={strength.level} hints={validation.hints} />
+					{/* Confirm password input */}
+					<Input
+						id="confirm-password"
+						label="Confirmar contraseña"
+						value={confirmPassword}
+						onChange={setConfirmPassword}
+						type="password"
+						placeholder="••••••••"
+						showPasswordToggle
+						icon={
+							<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+						}
+					/>
 
-			<input
-				type="password"
-				placeholder="Confirmar contraseña"
-				value={confirmPassword}
-				onChange={e => setConfirmPassword(e.target.value)}
-				className="w-full mb-2 p-2 border rounded"
-				required
-			/>
-
-			<button
-				type="submit"
-				className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-60"
-				disabled={loading || !validation.ok || password !== confirmPassword || locked}
-			>
-				{loading ? 'Creando...' : locked ? `Espera ${(Math.ceil(remainingMs / 1000))}s` : 'Crear Contraseña'}
-			</button>
-		</form>
+					{/* Submit button */}
+					<Button
+						type="submit"
+						loading={loading}
+						disabled={!validation.ok || password !== confirmPassword || locked}
+						className="w-full"
+					>
+						{locked ? `Espera ${Math.ceil(remainingMs / 1000)}s` : 'Crear Contraseña'}
+					</Button>
+				</form>
+			</Card>
+		</div>
 	);
 };
 

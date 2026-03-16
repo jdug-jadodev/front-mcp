@@ -71,7 +71,7 @@ export const saveAuth = (token: string, user: AuthUser) => {
   }
 };
 
-export const getToken = () => inMemoryAuthToken || localStorage.getItem('authToken');
+export const getToken = () => inMemoryAuthToken;
 
 export const getUser = () => {
   const user = localStorage.getItem('user');
@@ -81,8 +81,8 @@ export const getUser = () => {
 export const clearAuth = () => {
   inMemoryAuthToken = null;
   try {
+    // Remove legacy auth token keys if present (do not persist tokens anymore)
     localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
   } catch {
     // ignore
   }
