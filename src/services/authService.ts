@@ -63,7 +63,7 @@ export const authService = {
   },
 
   async oauthCallback(oauthRequest: string, jwtToken: string): Promise<OAuthCallbackSuccess | ErrorResponse> {
-    const MCP_OAUTH_CALLBACK = (import.meta.env.VITE_MCP_OAUTH_CALLBACK as string) || 'https://mcp-promps.onrender.com/oauth/callback';
+    const MCP_OAUTH_CALLBACK = (import.meta.env.VITE_MCP_CALLBACK as string) || 'https://mcp-promps.onrender.com/oauth/callback';
     return api.post<{ oauth_request: string; jwt: string }, OAuthCallbackSuccess | ErrorResponse>(MCP_OAUTH_CALLBACK, { oauth_request: oauthRequest, jwt: jwtToken });
   },
 
