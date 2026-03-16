@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { getUser, clearAuth } from '../lib/api';
+import { authService } from '../services/authService';
+import { getToken } from '../lib/api';
 
 const Dashboard = () => {
 	const navigate = useNavigate();
 	const user = getUser();
 	const [showWelcome, setShowWelcome] = useState(true);
+	const [oauthMsg, setOauthMsg] = useState<string | null>(null);
+	const [oauthLoading, setOauthLoading] = useState(false);
 
 	useEffect(() => {
 		// Hide welcome message after 3 seconds
@@ -15,6 +19,31 @@ const Dashboard = () => {
 			setShowWelcome(false);
 		}, 5000);
 		return () => clearTimeout(timer);
+	}, []);
+
+	// --- Detectar y lanzar POST a oauthCallback si corresponde ---
+	useEffect(() => {
+		async function handleOauthCallback() {
+			const oauthRequest = sessionStorage.getItem('oauth_request');
+			const token = getToken();
+			if (oauthRequest && token) {
+				setOauthLoading(true);
+				try {
+					const res = await authService.oauthCallback(oauthRequest, token);
+					if ((res as { status?: string }).status === 'success' || (res as { success?: boolean }).success) {
+						setOauthMsg('¡Autorización completada! Puedes volver a VS Code.');
+						sessionStorage.removeItem('oauth_request');
+					} else {
+						setOauthMsg('Error en autorización OAuth: ' + ((res as { message?: string }).message || 'Error desconocido'));
+					}
+				} catch (err) {
+					setOauthMsg('Error llamando al OAuth callback: ' + (err instanceof Error ? err.message : String(err)));
+				} finally {
+					setOauthLoading(false);
+				}
+			}
+		}
+		handleOauthCallback();
 	}, []);
 
 	const handleLogout = () => {
@@ -68,6 +97,16 @@ const Dashboard = () => {
 							Cerrar Sesión
 						</Button>
 					</div>
+					{oauthLoading && (
+						<div className="text-cyan-400 text-center font-semibold mb-2" role="status">
+							Autorizando con VS Code...
+						</div>
+					)}
+					{oauthMsg && (
+						<div className={oauthMsg.startsWith('¡Autorización') ? "text-green-600" : "text-red-500"} style={{textAlign:'center', fontWeight:'bold', marginBottom:8}} role="status">
+							{oauthMsg}
+						</div>
+					)}
 				</Card>
 			</div>
 		</div>

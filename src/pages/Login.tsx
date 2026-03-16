@@ -52,50 +52,15 @@ export default function LoginPage() {
 				const ok = res as { token: string; user: AuthUser }
 				saveAuth(ok.token, ok.user)
 
-				// --- Asegurar que oauth_request esté en sessionStorage si viene en la URL ---
-				let oauthRequest = sessionStorage.getItem('oauth_request')
+				// Solo guardar oauth_request si viene en la URL, para el dashboard
+				const oauthRequest = sessionStorage.getItem('oauth_request')
 				if (!oauthRequest) {
 					const params = new URLSearchParams(window.location.search)
 					const oauthFromUrl = params.get('oauth_request')
 					if (oauthFromUrl) {
 						sessionStorage.setItem('oauth_request', oauthFromUrl)
-						oauthRequest = oauthFromUrl
 					}
 				}
-				console.log('OAuth request on login:', oauthRequest) // Debug
-
-				if (oauthRequest) {
-					console.debug('OAuth request detected, calling callback with JWT')
-					console.debug('oauth_request:', oauthRequest)
-					console.debug('token present:', Boolean(ok.token))
-					try {
-						// Llamar al endpoint de OAuth callback con el JWT
-						const oauthRes = await authService.oauthCallback(oauthRequest, ok.token)
-						// Registrar resultado para diagnóstico
-						console.debug('oauthCallback response:', oauthRes)
-
-						if ((oauthRes as { status: string }).status === 'success' || (oauthRes as { success?: boolean }).success) {
-							// Limpiar sessionStorage
-							sessionStorage.removeItem('oauth_request')
-							// Mostrar mensaje de éxito en vez de redirigir
-							setError(null)
-							setSuccessMsg('¡Autorización completada! Puedes volver a VS Code.')
-							return
-						} else {
-							// Mostrar error visible y NO borrar oauth_request para reintentar
-							setError('OAuth callback falló: ' + ((oauthRes as { message?: string }).message || 'Error desconocido'))
-							console.error('OAuth callback failed:', oauthRes)
-							return
-						}
-					} catch (oauthErr) {
-						// Mostrar error visible y NO borrar oauth_request para reintentar
-						setError('Error llamando al OAuth callback: ' + (oauthErr instanceof Error ? oauthErr.message : String(oauthErr)))
-						console.error('OAuth callback error:', oauthErr)
-						return
-					}
-				}
-
-				// Navegación normal al dashboard si no hay OAuth o si falló
 				navigate('/dashboard')
 			} else {
 				setError((res as { message?: string }).message || 'Credenciales incorrectas')
@@ -117,9 +82,6 @@ export default function LoginPage() {
 		}
 	}, [error])
 
-	// Estado para mensaje de éxito
-	const [successMsg, setSuccessMsg] = useState<string | null>(null)
-
 	return (
 		<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
 			{/* Decorative elements */}
@@ -140,13 +102,6 @@ export default function LoginPage() {
 
 					{/* Error message */}
 					<FormError ref={errorRef} message={error} />
-
-					{/* Success message */}
-					{successMsg && (
-						<div className="text-green-600 text-center font-semibold mb-2" role="status">
-							{successMsg}
-						</div>
-					)}
 
 					{/* Email input */}
 					<Input
