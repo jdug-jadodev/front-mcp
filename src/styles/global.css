@@ -1,5 +1,7 @@
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
 
-/* Global overrides for the project */
+/* Global overrides for the project
+	Note: Tailwind v4 removed the `components` layer. If you previously
+	added custom component styles using `@layer components`, move them
+	into `@layer utilities` or `@layer base` as appropriate. */

@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { validatePasswordRules, calculatePasswordStrength } from '../lib/validators/password';
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
@@ -41,16 +40,19 @@ const CreatePassword: React.FC = () => {
 			setVerifying(true);
 			try {
 				const res = await authService.verifyResetToken(token);
-				if ((res as any).status === 'success') {
+				if (res.status === 'success') {
 					if (mounted) setVerified(true);
 					// Clean token from URL
 					try {
 						window.history.replaceState(null, '', window.location.pathname);
-					} catch {}
+					} catch (err) {
+						console.debug('Failed to remove token from URL', err);
+					}
 				} else {
 					if (mounted) setVerified(false);
 				}
-			} catch (e) {
+			} catch (_err) {
+				void _err;
 				if (mounted) setVerified(false);
 			} finally {
 				if (mounted) setVerifying(false);
@@ -84,14 +86,14 @@ const CreatePassword: React.FC = () => {
 
 		start(2000);
 		setLoading(true);
-		try {
-			const result = await authService.createPassword(token, password);
-			if ((result as any).status === 'success') {
+			try {
+				const result = await authService.createPassword(token, password);
+				if (result.status === 'success') {
 				// show success and redirect
 				navigate('/login', { state: { message: 'Contraseña creada correctamente' } });
 			} else {
-				const err = result as { status?: string; code?: string; message?: string };
-				const code = err.code;
+					const err = result as { status?: string; code?: string; message?: string };
+					const code = err.code;
 				if (code === 'WEAK_PASSWORD') {
 					setError('Contraseña rechazada por el servidor: demasiado débil. Intenta una más fuerte.');
 				} else if (code === 'INVALID_TOKEN') {
@@ -106,9 +108,10 @@ const CreatePassword: React.FC = () => {
 					setError(err.message ?? 'Error al crear la contraseña');
 				}
 			}
-		} catch (e) {
-			setError('Error de conexión');
-		} finally {
+			} catch (_err) {
+				void _err;
+				setError('Error de conexión');
+			} finally {
 			setLoading(false);
 		}
 	};
