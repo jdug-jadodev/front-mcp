@@ -52,15 +52,14 @@ export default function LoginPage() {
 				const ok = res as { token: string; user: AuthUser }
 				saveAuth(ok.token, ok.user)
 
-				// Solo guardar oauth_request si viene en la URL, para el dashboard
-				const oauthRequest = sessionStorage.getItem('oauth_request')
-				if (!oauthRequest) {
+				// Guardar oauth_request si viene en la URL (por si el efecto inicial no lo capturó)
+				if (!sessionStorage.getItem('oauth_request')) {
 					const params = new URLSearchParams(window.location.search)
 					const oauthFromUrl = params.get('oauth_request')
-					if (oauthFromUrl) {
-						sessionStorage.setItem('oauth_request', oauthFromUrl)
-					}
+					if (oauthFromUrl) sessionStorage.setItem('oauth_request', oauthFromUrl)
 				}
+
+				// Siempre ir al dashboard; desde ahí se gestiona el OAuth callback
 				navigate('/dashboard')
 			} else {
 				setError((res as { message?: string }).message || 'Credenciales incorrectas')

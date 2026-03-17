@@ -2,45 +2,38 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { getUser, clearAuth } from '../lib/api';
+import { getUser, clearAuth, getToken } from '../lib/api';
 import { authService } from '../services/authService';
-import { getToken } from '../lib/api';
 
 const Dashboard = () => {
 	const navigate = useNavigate();
 	const user = getUser();
 	const [showWelcome, setShowWelcome] = useState(true);
-	const [oauthMsg, setOauthMsg] = useState<string | null>(null);
-	const [oauthLoading, setOauthLoading] = useState(false);
 
 	useEffect(() => {
-		// Hide welcome message after 3 seconds
-		const timer = setTimeout(() => {
-			setShowWelcome(false);
-		}, 5000);
+		const timer = setTimeout(() => setShowWelcome(false), 5000);
 		return () => clearTimeout(timer);
 	}, []);
 
-	// --- Detectar y lanzar POST a oauthCallback si corresponde ---
+	// Si hay un oauth_request pendiente, hacer el callback y redirigir a VS Code
 	useEffect(() => {
 		async function handleOauthCallback() {
 			const oauthRequest = sessionStorage.getItem('oauth_request');
 			const token = getToken();
-			if (oauthRequest && token) {
-				setOauthLoading(true);
-				try {
-					const res = await authService.oauthCallback(oauthRequest, token);
-					if ((res as { status?: string }).status === 'success' || (res as { success?: boolean }).success) {
-						setOauthMsg('¡Autorización completada! Puedes volver a VS Code.');
-						sessionStorage.removeItem('oauth_request');
-					} else {
-						setOauthMsg('Error en autorización OAuth: ' + ((res as { message?: string }).message || 'Error desconocido'));
-					}
-				} catch (err) {
-					setOauthMsg('Error llamando al OAuth callback: ' + (err instanceof Error ? err.message : String(err)));
-				} finally {
-					setOauthLoading(false);
+			if (!oauthRequest || !token) return;
+			try {
+				const res = await authService.oauthCallback(oauthRequest, token);
+				sessionStorage.removeItem('oauth_request');
+				const r = res as { status?: string; redirectUrl?: string };
+				if (r.status === 'success' && r.redirectUrl) {
+					// Abrir en nueva pestaña para no salir del dashboard
+					window.open(r.redirectUrl, '_blank');
 				}
+				// Si falla o no hay redirectUrl, quedarse en el dashboard
+			} catch (err) {
+				console.error('OAuth callback error:', err);
+				sessionStorage.removeItem('oauth_request');
+				// Error de red: quedarse en el dashboard
 			}
 		}
 		handleOauthCallback();
@@ -97,16 +90,6 @@ const Dashboard = () => {
 							Cerrar Sesión
 						</Button>
 					</div>
-					{oauthLoading && (
-						<div className="text-cyan-400 text-center font-semibold mb-2" role="status">
-							Autorizando con VS Code...
-						</div>
-					)}
-					{oauthMsg && (
-						<div className={oauthMsg.startsWith('¡Autorización') ? "text-green-600" : "text-red-500"} style={{textAlign:'center', fontWeight:'bold', marginBottom:8}} role="status">
-							{oauthMsg}
-						</div>
-					)}
 				</Card>
 			</div>
 		</div>

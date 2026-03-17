@@ -50,7 +50,7 @@ export interface RegisterEmailSuccess {
 
 export interface OAuthCallbackSuccess {
   status: 'success';
-  redirectUrl: string;
+  redirectUrl: string; // URL HTTPS del backend que hace el redirect final a VS Code
 }
 
 export const authService = {
