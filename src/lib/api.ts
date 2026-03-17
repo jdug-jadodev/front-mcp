@@ -134,3 +134,85 @@ export const isAuthenticated = () => {
   if (!exp || Number.isNaN(exp)) return false;
   return Date.now() < exp;
 };
+
+// Token validation for password reset/creation flows
+export interface TokenValidationResult {
+  valid: boolean;
+  status: 'valid' | 'expired' | 'used' | 'not_found' | 'invalid_type' | 'error';
+  message: string;
+  email?: string;
+}
+
+/**
+ * Valida un token de cambio de contraseña contra el backend.
+ * 
+ * @param token - JWT del usuario (viene en URL)
+ * @param type - Tipo de operación ('password_creation' | 'password_reset')
+ * @returns Resultado de validación con estado del token
+ */
+export async function validatePasswordToken(
+  token: string,
+  type: 'password_creation' | 'password_reset'
+): Promise<TokenValidationResult> {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+    if (!apiUrl) {
+      return {
+        valid: false,
+        status: 'error',
+        message: 'Configuración de API no disponible'
+      };
+    }
+
+    // Codificar token por seguridad (contiene caracteres especiales)
+    const url = `${apiUrl}/auth/validate-token?token=${encodeURIComponent(
+      token
+    )}&type=${type}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    // Respuesta exitosa del backend
+    if (response.ok) {
+      const json = await response.json() as { status: string; data?: TokenValidationResult };
+      if (json.status === 'success' && json.data) {
+        return json.data;
+      }
+    }
+
+    // Respuesta con error del backend
+    if (!response.ok) {
+      const json = await response.json() as { message?: string };
+      return {
+        valid: false,
+        status: 'error',
+        message: json.message || 'Error al validar el enlace. Intenta de nuevo.'
+      };
+    }
+
+    // Respuesta no esperada
+    return {
+      valid: false,
+      status: 'error',
+      message: 'Ocurrió un error inesperado'
+    };
+  } catch (error) {
+    // Error de red, timeout, o CORS
+    console.error('Error validating token:', error instanceof Error ? error.message : 'unknown');
+    return {
+      valid: false,
+      status: 'error',
+      message: 'No se pudo verificar el enlace. Revisa tu conexión e intenta de nuevo.'
+    };
+  }
+}

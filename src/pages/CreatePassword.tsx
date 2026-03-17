@@ -6,9 +6,13 @@ import Button from '../components/Button';
 import FormError from '../components/FormError';
 import { authService } from '../services/authService';
 import { validatePasswordRules, calculatePasswordStrength } from '../lib/validators/password';
+import { validatePasswordToken } from '../lib/api';
+import type { TokenValidationResult } from '../lib/api';
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 import { useRequestLock } from '../hooks/useRequestLock';
 import { useTokenFromUrl } from '../hooks/useTokenFromUrl';
+
+type ValidationState = 'validating' | 'valid' | 'expired' | 'used' | 'invalid' | 'no_token' | 'error';
 
 const CreatePassword: React.FC = () => {
 	const [password, setPassword] = useState('');
@@ -17,8 +21,9 @@ const CreatePassword: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const navigate = useNavigate();
 	const token = useTokenFromUrl();
-	const [verified, setVerified] = useState<boolean | null>(null);
-	const [verifying, setVerifying] = useState(false);
+	
+	const [validationState, setValidationState] = useState<ValidationState>('validating');
+	const [validationResult, setValidationResult] = useState<TokenValidationResult | null>(null);
 
 	const { locked, remainingMs, start } = useRequestLock();
 
@@ -34,109 +39,122 @@ const CreatePassword: React.FC = () => {
 		return () => clearTimeout(t);
 	}, [password]);
 
-	// Verify token with backend before rendering form
+	// Validate token on mount using new API
 	useEffect(() => {
-		let mounted = true;
-		const doVerify = async () => {
-			if (!token) {
-				if (mounted) setVerified(false);
-				return;
-			}
-			setVerifying(true);
-			try {
-				const res = await authService.verifyResetToken(token);
-				if (res.status === 'success') {
-					if (mounted) setVerified(true);
-				} else {
-					if (mounted) setVerified(false);
+		if (!token) {
+			setValidationState('no_token');
+			return;
+		}
+
+		setValidationState('validating');
+		validatePasswordToken(token, 'password_creation').then((result) => {
+			setValidationResult(result);
+			
+			if (result.valid) {
+				setValidationState('valid');
+			} else {
+				switch (result.status) {
+					case 'expired':
+						setValidationState('expired');
+						break;
+					case 'used':
+						setValidationState('used');
+						break;
+					default:
+						setValidationState('invalid');
 				}
-			} catch (_err) {
-				void _err;
-				if (mounted) setVerified(false);
-			} finally {
-				if (mounted) setVerifying(false);
 			}
-		};
-		doVerify();
-		return () => { mounted = false; };
+		});
 	}, [token]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError('');
+		
 		if (!token) {
-			setError('Token inválido o expirado');
-			navigate('/forgot-password');
+			setError('Token no disponible');
 			return;
 		}
-		if (verified === false) {
-			setError('Enlace inválido o expirado');
-			return;
-		}
-		if (!validation.ok) {
-			setError('La contraseña no cumple los requisitos');
-			return;
-		}
+
 		if (password !== confirmPassword) {
 			setError('Las contraseñas no coinciden');
 			return;
 		}
+
+		if (!validation.ok) {
+			setError('La contraseña no cumple los requisitos');
+			return;
+		}
+
 		if (locked) return;
 
 		start(2000);
 		setLoading(true);
-			try {
-				const result = await authService.createPassword(token, password);
-				if (result.status === 'success') {
-				// show success and redirect
-				navigate('/login', { state: { message: 'Contraseña creada correctamente' } });
+		
+		try {
+			const result = await authService.createPassword(token, password);
+			if (result.status === 'success') {
+				navigate('/login', { state: { message: 'Contraseña creada. Por favor, inicia sesión.' } });
 			} else {
-					const err = result as { status?: string; code?: string; message?: string };
-					const code = err.code;
-				if (code === 'WEAK_PASSWORD') {
+				const err = result as { code?: string; message?: string };
+				if (err.code === 'WEAK_PASSWORD') {
 					setError('Contraseña rechazada por el servidor: demasiado débil. Intenta una más fuerte.');
-				} else if (code === 'INVALID_TOKEN') {
+				} else if (err.code === 'INVALID_TOKEN') {
 					setError('Enlace inválido o expirado. Solicita un nuevo enlace.');
-				} else if (code === 'TOKEN_ALREADY_USED') {
+				} else if (err.code === 'TOKEN_ALREADY_USED') {
 					setError('Este enlace ya fue usado. Solicita un nuevo enlace.');
-				} else if (code === 'ALREADY_HAS_PASSWORD') {
-					setError('El usuario ya tiene contraseña. Puedes iniciar sesión.');
-				} else if (code === 'TOO_MANY_REQUESTS') {
-					setError('Demasiadas solicitudes. Intenta nuevamente más tarde.');
 				} else {
 					setError(err.message ?? 'Error al crear la contraseña');
 				}
 			}
-			} catch (_err) {
-				void _err;
-				setError('Error de conexión');
-			} finally {
+		} catch (_err) {
+			void _err;
+			setError('Error de conexión');
+		} finally {
 			setLoading(false);
 		}
 	};
 
-	if (verifying) {
-		return (
-			<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12">
-				<Card>
-					<div className="text-center text-slate-300">Verificando enlace...</div>
-				</Card>
-			</div>
-		);
-	}
-
-	if (verified === false) {
+	// Estado: Validando
+	if (validationState === 'validating') {
 		return (
 			<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
 				<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
 				<div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
 				
-				<Card className="relative z-10">
-					<div className="text-center mb-6">
-						<h1 className="text-2xl font-bold gradient-text mb-2">Enlace Inválido</h1>
-						<p className="text-rose-300 mb-4">Enlace inválido o expirado. Solicita un nuevo enlace.</p>
-						<Button onClick={() => navigate('/forgot-password')}>
-							Solicitar nuevo enlace
+				<Card className="relative z-10 w-full max-w-md">
+					<div className="space-y-4">
+						<div className="h-8 bg-gray-700 rounded animate-pulse"></div>
+						<div className="h-4 bg-gray-700 rounded animate-pulse"></div>
+						<p className="text-sm text-gray-400 text-center">
+							Verificando tu enlace...
+						</p>
+					</div>
+				</Card>
+			</div>
+		);
+	}
+
+	// Estado: No hay token en URL
+	if (validationState === 'no_token') {
+		return (
+			<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
+				<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+				<div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
+				
+				<Card className="relative z-10 w-full max-w-md">
+					<div className="space-y-6 text-center">
+						<div>
+							<h1 className="text-2xl font-bold mb-2">Enlace no válido</h1>
+							<p className="text-gray-400">
+								No se encontró un enlace de creación de contraseña.
+							</p>
+						</div>
+						<Button
+							onClick={() => navigate('/forgot-password')}
+							className="w-full"
+						>
+							Solicitar un nuevo enlace
 						</Button>
 					</div>
 				</Card>
@@ -144,21 +162,109 @@ const CreatePassword: React.FC = () => {
 		);
 	}
 
+	// Estado: Token expirado
+	if (validationState === 'expired') {
+		return (
+			<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
+				<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+				<div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
+				
+				<Card className="relative z-10 w-full max-w-md">
+					<div className="space-y-6 text-center">
+						<div>
+							<h1 className="text-2xl font-bold mb-2">Enlace expirado</h1>
+							<p className="text-gray-400">
+								El enlace de creación de contraseña ya no es válido.
+							</p>
+						</div>
+						<Button
+							onClick={() => navigate('/forgot-password')}
+							className="w-full"
+						>
+							Solicitar un nuevo enlace
+						</Button>
+					</div>
+				</Card>
+			</div>
+		);
+	}
+
+	// Estado: Token ya usado
+	if (validationState === 'used') {
+		return (
+			<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
+				<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+				<div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
+				
+				<Card className="relative z-10 w-full max-w-md">
+					<div className="space-y-6 text-center">
+						<div>
+							<h1 className="text-2xl font-bold mb-2">Enlace ya utilizado</h1>
+							<p className="text-gray-400">
+								Este enlace ya fue usado para crear una contraseña.
+							</p>
+						</div>
+						<Button
+							onClick={() => navigate('/login')}
+							className="w-full"
+						>
+							Ir al inicio de sesión
+						</Button>
+					</div>
+				</Card>
+			</div>
+		);
+	}
+
+	// Estado: Error genérico o token inválido
+	if (validationState === 'invalid' || validationState === 'error') {
+		return (
+			<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
+				<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+				<div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
+				
+				<Card className="relative z-10 w-full max-w-md">
+					<div className="space-y-6 text-center">
+						<div>
+							<h1 className="text-2xl font-bold mb-2">Error</h1>
+							<p className="text-gray-400">
+								{validationResult?.message || 
+								 'No se pudo procesar tu solicitud. Intenta de nuevo.'}
+							</p>
+						</div>
+						<Button
+							onClick={() => navigate('/login')}
+							className="w-full"
+						>
+							Ir al inicio de sesión
+						</Button>
+					</div>
+				</Card>
+			</div>
+		);
+	}
+
+	// Estado: Válido - Mostrar formulario
+
+	// Estado: Válido - Mostrar formulario
 	return (
 		<div className="min-h-screen bg-gradient-animated flex items-center justify-center px-4 py-12 relative overflow-hidden">
 			{/* Decorative elements */}
 			<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
 			<div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
 			
-			<Card className="relative z-10">
+			<Card className="relative z-10 w-full max-w-md">
 				<form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
 					{/* Header */}
 					<div className="text-center mb-4">
 						<h1 className="text-3xl font-bold gradient-text mb-2">
 							Crear Contraseña
 						</h1>
-						<p className="text-slate-400 text-xs mb-2">
-							Requisitos mínimos: mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.
+						<p className="text-slate-400 text-sm">
+							Creando contraseña para: <strong>{validationResult?.email}</strong>
+						</p>
+						<p className="text-slate-400 text-xs mt-2">
+							Requisitos: min. 8 caracteres, mayúscula, minúscula, número y símbolo.
 						</p>
 					</div>
 
