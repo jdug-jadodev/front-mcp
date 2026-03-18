@@ -77,7 +77,7 @@ const Dashboard = () => {
 		// 2. Intentar revocación server-side en backend (requiere JWT válido)
 		if (loginToken) {
 			try {
-				console.log('📡 Intentando revocación MCP server-side (POST /auth/revoke-mcp)');
+				console.log('📡 Intentando revocación MCP server-side (POST /oauth/revoke)');
 				type RevokeResult = { status: 'success' } | { status: 'error'; message: string };
 				const srvRes = (await withTimeout(authService.revokeMCPServerSide(), 5000).catch(err => ({ status: 'error', message: String(err) } as { status: 'error'; message: string }))) as RevokeResult;
 				if (srvRes.status === 'success') {
