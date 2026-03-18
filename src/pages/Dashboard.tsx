@@ -74,9 +74,61 @@ const Dashboard = () => {
 		let mcpRevoked = false;
 		
 		// 2. Revocar JWT del Backend de Login
+		// 2. Intentar revocación server-side en backend (requiere JWT válido)
 		if (loginToken) {
 			try {
-				console.log('📡 Paso 1/3: Revocando JWT en Backend de Login...');
+				console.log('📡 Intentando revocación MCP server-side (POST /auth/revoke-mcp)');
+				type RevokeResult = { status: 'success' } | { status: 'error'; message: string };
+				const srvRes = (await withTimeout(authService.revokeMCPServerSide(), 5000).catch(err => ({ status: 'error', message: String(err) } as { status: 'error'; message: string }))) as RevokeResult;
+				if (srvRes.status === 'success') {
+					console.log('✅ Revocación MCP realizada server-side');
+					mcpRevoked = true;
+				} else {
+					console.warn('⚠️ Revocación server-side falló o no disponible:', srvRes.message);
+				}
+			} catch (err) {
+				console.warn('⚠️ Error al solicitar revocación server-side:', err);
+			}
+		} else {
+			console.log('ℹ️ No hay JWT disponible para solicitar revocación server-side');
+		}
+
+		// 3. Si la revocación server-side no se realizó y hay tokens en localStorage, intentar revocación cliente-side
+		if (!mcpRevoked) {
+			if (mcpAccessToken) {
+				try {
+					// 3.1. Revocar refresh_token primero (más importante para seguridad)
+					if (mcpRefreshToken) {
+						console.log('📡 Paso fallback: Revocando refresh_token de MCP (client-side)...');
+						await withTimeout(
+							authService.revokeMCPRefreshToken(mcpRefreshToken, mcpAccessToken),
+							5000
+						).catch(err => console.warn('⚠️ Error revocando refresh_token (fallback):', err));
+					}
+					// 3.2. Revocar access_token
+					console.log('📡 Paso fallback: Revocando access_token de MCP (client-side)...');
+					const result = await withTimeout(
+						authService.revokeMCPToken(mcpAccessToken),
+						5000
+					);
+					if (result.status === 'success') {
+						console.log('✅ Access token de MCP revocado correctamente (fallback)');
+						mcpRevoked = true;
+					} else {
+						console.warn('⚠️ No se pudo revocar access_token de MCP (fallback):', result.message);
+					}
+				} catch (error) {
+					console.error('❌ Error/Timeout revocando tokens de MCP (fallback):', error);
+				}
+			} else {
+				console.log('ℹ️ No hay access_token de MCP para revocar (fallback)');
+			}
+		}
+		
+		// 4. Revocar JWT del Backend de Login (hacerlo después de las revocaciones que requieren JWT)
+		if (loginToken) {
+			try {
+				console.log('📡 Paso final: Revocando JWT en Backend de Login...');
 				const result = await withTimeout(
 					authService.logout(loginToken),
 					5000 // 5 segundos de timeout
@@ -94,39 +146,6 @@ const Dashboard = () => {
 			}
 		} else {
 			console.log('ℹ️ No hay JWT del Backend de Login para revocar');
-		}
-		
-		// 3. Revocar tokens de MCP Server
-		if (mcpAccessToken) {
-			try {
-				// 3.1. Revocar refresh_token primero (más importante para seguridad)
-				if (mcpRefreshToken) {
-					console.log('📡 Paso 2/3: Revocando refresh_token de MCP...');
-					await withTimeout(
-						authService.revokeMCPRefreshToken(mcpRefreshToken, mcpAccessToken),
-						5000
-					).catch(err => console.warn('⚠️ Error revocando refresh_token:', err));
-				}
-				
-				// 3.2. Revocar access_token
-				console.log('📡 Paso 3/3: Revocando access_token de MCP...');
-				const result = await withTimeout(
-					authService.revokeMCPToken(mcpAccessToken),
-					5000
-				);
-				
-				if (result.status === 'success') {
-					console.log('✅ Access token de MCP revocado correctamente');
-					mcpRevoked = true;
-				} else {
-					console.warn('⚠️ No se pudo revocar access_token de MCP:', result.message);
-				}
-			} catch (error) {
-				console.error('❌ Error/Timeout revocando tokens de MCP:', error);
-				// Continuar con el logout aunque falle
-			}
-		} else {
-			console.log('ℹ️ No hay access_token de MCP para revocar');
 		}
 		
 		// 4. Limpiar TODOS los datos del localStorage

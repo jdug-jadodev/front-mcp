@@ -62,6 +62,25 @@ export const authService = {
     return api.post<{ email: string }, CheckEmailSuccess | ErrorResponse>('/auth/check-email', { email });
   },
 
+  /**
+   * Solicita al backend que revoque los tokens MCP asociados al usuario.
+   * Implementación cliente -> backend. El backend debe manejar la revocación
+   * server-side (usar sus credenciales y tokens almacenados) y devolver estado.
+   */
+  async revokeMCPServerSide(): Promise<{ status: 'success' } | { status: 'error'; message: string }> {
+    try {
+      return await api.post<unknown, { status: 'success' } | { status: 'error'; message: string }>(
+        '/auth/revoke-mcp',
+        {}
+      );
+    } catch (err) {
+      if (err instanceof Error) {
+        return { status: 'error', message: err.message };
+      }
+      return { status: 'error', message: 'Error desconocido al solicitar revocación MCP' };
+    }
+  },
+
   async login(email: string, password: string): Promise<LoginSuccess | ErrorResponse> {
     return api.post<{ email: string; password: string }, LoginSuccess | ErrorResponse>('/auth/login', { email, password });
   },
