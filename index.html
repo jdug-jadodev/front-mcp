@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Content Security Policy: ajustar VITE_API_URL en build si es necesario -->
     <!-- Nota: algunas directivas (p.ej. frame-ancestors) no son aplicadas desde <meta> y deben enviarse como header en el servidor. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' http://localhost:4000 ws://localhost:4000 https://loggin-mcp.onrender.com https://mcp-promps.onrender.com; font-src 'self' https://fonts.gstatic.com data:; base-uri 'self';">
+    <!-- DESARROLLO: 'unsafe-eval' necesario para Vite HMR. Remover en producción -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' http://localhost:4000 ws://localhost:4000 https://loggin-mcp.onrender.com https://mcp-promps.onrender.com; font-src 'self' https://fonts.gstatic.com data:; base-uri 'self';">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

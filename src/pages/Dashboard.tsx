@@ -9,6 +9,7 @@ const Dashboard = () => {
 	const navigate = useNavigate();
 	const user = getUser();
 	const [showWelcome, setShowWelcome] = useState(true);
+	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
 	useEffect(() => {
 		const timer = setTimeout(() => setShowWelcome(false), 5000);
@@ -39,8 +40,127 @@ const Dashboard = () => {
 		handleOauthCallback();
 	}, []);
 
-	const handleLogout = () => {
+	/**
+	 * Ejecutar promesa con timeout
+	 * Evita que el logout se bloquee indefinidamente
+	 */
+	function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+		return Promise.race([
+			promise,
+			new Promise<T>((_, reject) =>
+				setTimeout(() => reject(new Error('Timeout')), timeoutMs)
+			)
+		]);
+	}
+
+	/**
+	 * Logout completo: revoca tokens en AMBOS sistemas
+	 * 1. Backend de Login (Loggin-MCP) - revoca JWT
+	 * 2. MCP Server - revoca access_token OAuth
+	 * 
+	 * Al completar, VSCode pierde acceso al MCP inmediatamente.
+	 */
+	const handleLogout = async () => {
+		setIsLoggingOut(true);
+		
+		console.log('🚪 ===== INICIANDO LOGOUT COMPLETO =====');
+		
+		// 1. Obtener todos los tokens almacenados
+		const loginToken = localStorage.getItem('authToken');
+		const mcpAccessToken = localStorage.getItem('mcp_access_token');
+		const mcpRefreshToken = localStorage.getItem('mcp_refresh_token');
+		
+		let loginRevoked = false;
+		let mcpRevoked = false;
+		
+		// 2. Revocar JWT del Backend de Login
+		if (loginToken) {
+			try {
+				console.log('📡 Paso 1/3: Revocando JWT en Backend de Login...');
+				const result = await withTimeout(
+					authService.logout(loginToken),
+					5000 // 5 segundos de timeout
+				);
+				
+				if (result.status === 'success') {
+					console.log('✅ JWT revocado correctamente');
+					loginRevoked = true;
+				} else {
+					console.warn('⚠️ No se pudo revocar JWT:', result.message);
+				}
+			} catch (error) {
+				console.error('❌ Error/Timeout revocando JWT:', error);
+				// Continuar con el logout aunque falle
+			}
+		} else {
+			console.log('ℹ️ No hay JWT del Backend de Login para revocar');
+		}
+		
+		// 3. Revocar tokens de MCP Server
+		if (mcpAccessToken) {
+			try {
+				// 3.1. Revocar refresh_token primero (más importante para seguridad)
+				if (mcpRefreshToken) {
+					console.log('📡 Paso 2/3: Revocando refresh_token de MCP...');
+					await withTimeout(
+						authService.revokeMCPRefreshToken(mcpRefreshToken, mcpAccessToken),
+						5000
+					).catch(err => console.warn('⚠️ Error revocando refresh_token:', err));
+				}
+				
+				// 3.2. Revocar access_token
+				console.log('📡 Paso 3/3: Revocando access_token de MCP...');
+				const result = await withTimeout(
+					authService.revokeMCPToken(mcpAccessToken),
+					5000
+				);
+				
+				if (result.status === 'success') {
+					console.log('✅ Access token de MCP revocado correctamente');
+					mcpRevoked = true;
+				} else {
+					console.warn('⚠️ No se pudo revocar access_token de MCP:', result.message);
+				}
+			} catch (error) {
+				console.error('❌ Error/Timeout revocando tokens de MCP:', error);
+				// Continuar con el logout aunque falle
+			}
+		} else {
+			console.log('ℹ️ No hay access_token de MCP para revocar');
+		}
+		
+		// 4. Limpiar TODOS los datos del localStorage
+		console.log('🧹 Limpiando almacenamiento local...');
+		localStorage.removeItem('authToken');
+		localStorage.removeItem('token_expires_at');
+		localStorage.removeItem('user');
+		localStorage.removeItem('mcp_access_token');
+		localStorage.removeItem('mcp_refresh_token');
+		localStorage.removeItem('mcp_token_expires_at');
+		sessionStorage.removeItem('oauth_request');
+		
+		// También limpiar memoria (clearAuth de api.ts)
 		clearAuth();
+		
+		// 5. Log del resultado
+		if (loginRevoked && mcpRevoked) {
+			console.log('✅ ===== LOGOUT COMPLETO EXITOSO =====');
+			console.log('   JWT revocado: ✓');
+			console.log('   MCP token revocado: ✓');
+			console.log('   VSCode perderá acceso al MCP');
+		} else if (loginRevoked || mcpRevoked) {
+			console.log('🔶 ===== LOGOUT PARCIAL =====');
+			console.log(`   JWT revocado: ${loginRevoked ? '✓' : '✗'}`);
+			console.log(`   MCP token revocado: ${mcpRevoked ? '✓' : '✗'}`);
+		} else {
+			console.log('⚠️ ===== LOGOUT LOCAL SOLAMENTE =====');
+			console.log('   No se pudieron revocar tokens remotos');
+			console.log('   Tokens expirarán naturalmente');
+		}
+		
+		setIsLoggingOut(false);
+		
+		// 6. Redirigir a login
 		navigate('/login');
 	};
 
@@ -86,8 +206,35 @@ const Dashboard = () => {
 								</p>
 							</div>
 						</div>
-						<Button variant="ghost" onClick={handleLogout}>
-							Cerrar Sesión
+						<Button 
+							variant="ghost" 
+							onClick={handleLogout}
+							disabled={isLoggingOut}
+						>
+							{isLoggingOut ? (
+								<>
+									{/* Spinner SVG */}
+									<svg className="animate-spin h-5 w-5 mr-2 inline-block" viewBox="0 0 24 24">
+										<circle 
+											className="opacity-25" 
+											cx="12" 
+											cy="12" 
+											r="10" 
+											stroke="currentColor" 
+											strokeWidth="4" 
+											fill="none" 
+										/>
+										<path 
+											className="opacity-75" 
+											fill="currentColor" 
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
+										/>
+									</svg>
+									Cerrando sesión...
+								</>
+							) : (
+								'Cerrar Sesión'
+							)}
 						</Button>
 					</div>
 				</Card>
