@@ -69,8 +69,11 @@ export const authService = {
    */
   async revokeMCPServerSide(): Promise<{ status: 'success' } | { status: 'error'; message: string }> {
     try {
+      // Llamar directamente al endpoint de MCP (URL absoluta) en lugar de usar
+      // el baseURL del `api` (que apunta al backend de login). Esto asegura que
+      // la petición vaya a https://.../oauth/revoke y no a /auth/revoke-mcp.
       return await api.post<unknown, { status: 'success' } | { status: 'error'; message: string }>(
-        '/auth/revoke-mcp',
+        `${MCP_BASE_URL}/oauth/revoke`,
         {}
       );
     } catch (err) {
@@ -156,39 +159,7 @@ export const authService = {
    * @returns Promise con el resultado
    */
   async revokeMCPToken(mcpAccessToken: string): Promise<{ status: 'success' } | { status: 'error'; message: string }> {
-    try {
-      console.log('🔐 Revocando access_token en MCP Server...');
-      
-      const response = await fetch(`${MCP_BASE_URL}/oauth/revoke`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Bearer ${mcpAccessToken}`
-        },
-        body: new URLSearchParams({
-          token: mcpAccessToken,
-          token_type_hint: 'access_token'
-        })
-      });
-      
-      if (response.ok) {
-        console.log('✅ Access token de MCP revocado');
-        return { status: 'success' };
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('❌ Error revocando token de MCP:', errorData);
-        return {
-          status: 'error',
-          message: errorData.message || 'Error al revocar token de MCP'
-        };
-      }
-    } catch (error) {
-      console.error('❌ Error de red revocando token de MCP:', error);
-      return {
-        status: 'error',
-        message: 'Error de red al revocar token de MCP'
-      };
-    }
+    return await revokeOnMcp(mcpAccessToken, 'access_token', mcpAccessToken);
   },
 
   /**
@@ -201,37 +172,43 @@ export const authService = {
     mcpRefreshToken: string, 
     mcpAccessToken: string
   ): Promise<{ status: 'success' } | { status: 'error'; message: string }> {
-    try {
-      console.log('🔐 Revocando refresh_token en MCP Server...');
-      
-      const response = await fetch(`${MCP_BASE_URL}/oauth/revoke`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Bearer ${mcpAccessToken}`
-        },
-        body: new URLSearchParams({
-          token: mcpRefreshToken,
-          token_type_hint: 'refresh_token'
-        })
-      });
-      
-      if (response.ok) {
-        console.log('✅ Refresh token de MCP revocado');
-        return { status: 'success' };
-      } else {
-        return {
-          status: 'error',
-          message: 'Error al revocar refresh token de MCP'
-        };
-      }
-    } catch (error) {
-      console.error('❌ Error revocando refresh token de MCP:', error);
-      return {
-        status: 'error',
-        message: 'Error de red'
-      };
-    }
+    return await revokeOnMcp(mcpRefreshToken, 'refresh_token', mcpAccessToken);
   }
 };
+
+/**
+ * Helper que realiza la petición de revocación hacia MCP siguiendo el formato curl esperado:
+ * - POST {MCP_BASE_URL}/oauth/revoke
+ * - Header: Authorization: Bearer <USER_ACCESS_TOKEN>
+ * - Content-Type: application/x-www-form-urlencoded
+ * - Body: token=<TOKEN>&token_type_hint=<access_token|refresh_token>
+ */
+async function revokeOnMcp(
+  tokenToRevoke: string,
+  tokenTypeHint: 'access_token' | 'refresh_token',
+  userAccessToken: string
+): Promise<{ status: 'success' } | { status: 'error'; message: string }> {
+  try {
+    const response = await fetch(`${MCP_BASE_URL}/oauth/revoke`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Bearer ${userAccessToken}`
+      },
+      body: new URLSearchParams({ token: tokenToRevoke, token_type_hint: tokenTypeHint })
+    });
+
+    if (response.ok) {
+      return { status: 'success' };
+    }
+
+    const text = await response.text().catch(() => '');
+    return { status: 'error', message: text || 'Error al revocar token en MCP' };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { status: 'error', message: err.message };
+    }
+    return { status: 'error', message: 'Error de red al revocar token en MCP' };
+  }
+}
 
